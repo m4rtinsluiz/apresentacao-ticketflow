@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TicketFlow — Como Fiz o Site</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #0a0612; --bg-alt: #120a1f; --card: #170d28;
+    --purple: #a855f7; --purple-bright: #c084fc; --purple-glow: rgba(168,85,247,0.55);
+    --text: #e9e3f5; --text-dim: #a89bbd; --border: rgba(168,85,247,0.25);
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.7; color: var(--text); background: var(--bg); overflow-x: hidden; }
+
+  body::before {
+    content: ""; position: fixed; inset: -20%; z-index: -2;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(168,85,247,0.18), transparent 40%),
+      radial-gradient(circle at 80% 40%, rgba(124,58,237,0.16), transparent 45%),
+      radial-gradient(circle at 50% 90%, rgba(192,132,252,0.14), transparent 40%);
+    animation: floatGlow 14s ease-in-out infinite alternate; pointer-events: none;
+  }
+  @keyframes floatGlow {
+    0% { transform: translate(0,0) scale(1); } 50% { transform: translate(-3%,2%) scale(1.05); } 100% { transform: translate(3%,-2%) scale(1.02); }
+  }
+  body::after {
+    content: ""; position: fixed; inset: 0; z-index: -1;
+    background-image: linear-gradient(rgba(168,85,247,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(168,85,247,0.05) 1px, transparent 1px);
+    background-size: 60px 60px; mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%); pointer-events: none;
+  }
+
+  header { position: relative; text-align: center; padding: 6rem 2rem 5rem; overflow: hidden; }
+  header::before {
+    content: ""; position: absolute; top: -50%; left: 50%; transform: translateX(-50%);
+    width: 800px; height: 800px; background: radial-gradient(circle, rgba(168,85,247,0.35), transparent 60%);
+    filter: blur(60px); animation: pulseGlow 6s ease-in-out infinite; z-index: -1;
+  }
+  @keyframes pulseGlow {
+    0%,100% { opacity: 0.6; transform: translateX(-50%) scale(1); } 50% { opacity: 1; transform: translateX(-50%) scale(1.15); }
+  }
+  header h1 {
+    font-size: clamp(2.2rem, 6vw, 4rem); font-weight: 800; letter-spacing: -1px; line-height: 1.1;
+    background: linear-gradient(135deg, #fff 0%, var(--purple-bright) 50%, #fff 100%); background-size: 200% auto;
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    animation: shine 4s linear infinite; margin-bottom: 1rem;
+  }
+  @keyframes shine { to { background-position: 200% center; } }
+  header p { font-size: 1.15rem; color: var(--text-dim); letter-spacing: 0.5px; }
+
+  main { max-width: 1000px; margin: 0 auto; padding: 2rem 2rem 5rem; }
+
+  section {
+    position: relative; background: linear-gradient(160deg, var(--card), var(--bg-alt));
+    border: 1px solid var(--border); border-radius: 20px; padding: 2.5rem; margin-bottom: 2.5rem;
+    transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+  }
+  section::before {
+    content: ""; position: absolute; inset: 0; border-radius: 20px; padding: 1px;
+    background: linear-gradient(135deg, var(--purple), transparent 40%, transparent 60%, var(--purple-bright));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+    opacity: 0.4; transition: opacity 0.35s ease; pointer-events: none;
+  }
+  section:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 0 30px var(--purple-glow), 0 0 60px rgba(168,85,247,0.2), inset 0 0 30px rgba(168,85,247,0.05);
+    border-color: transparent;
+  }
+  section:hover::before { opacity: 1; }
+
+  section h2 {
+    display: flex; align-items: center; gap: 0.9rem; font-size: 1.7rem; margin-bottom: 1.3rem;
+    background: linear-gradient(90deg, #fff, var(--purple-bright)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .step-number {
+    flex-shrink: 0; width: 44px; height: 44px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; font-weight: 800; color: #fff; background: linear-gradient(135deg, #7c3aed, var(--purple-bright));
+    box-shadow: 0 0 18px var(--purple-glow), 0 0 36px rgba(168,85,247,0.4); animation: badgePulse 3s ease-in-out infinite;
+    -webkit-text-fill-color: #fff;
+  }
+  @keyframes badgePulse {
+    0%,100% { box-shadow: 0 0 18px var(--purple-glow), 0 0 36px rgba(168,85,247,0.4); }
+    50% { box-shadow: 0 0 26px var(--purple-bright), 0 0 60px rgba(192,132,252,0.6); }
+  }
+  section h3 { color: var(--purple-bright); margin: 1.4rem 0 0.5rem; font-size: 1.1rem; letter-spacing: 0.3px; }
+
+  p { margin-bottom: 1rem; color: var(--text); }
+  ul { margin: 0.5rem 0 1rem 1.4rem; }
+  li { margin-bottom: 0.55rem; }
+  li::marker { color: var(--purple); }
+  a { color: var(--purple-bright); text-decoration: none; border-bottom: 1px dashed var(--purple); transition: color 0.2s, text-shadow 0.2s; }
+  a:hover { color: #fff; text-shadow: 0 0 12px var(--purple-glow); }
+
+  code { background: rgba(168,85,247,0.12); padding: 0.15rem 0.45rem; border-radius: 5px; font-family: 'Courier New', monospace; font-size: 0.9rem; color: var(--purple-bright); }
+  pre { background: #0d0718; border: 1px solid var(--border); color: #d8c9f0; padding: 1.2rem; border-radius: 12px; overflow-x: auto; margin: 1rem 0; font-size: 0.88rem; box-shadow: inset 0 0 30px rgba(168,85,247,0.08); }
+  pre code { background: none; padding: 0; color: inherit; }
+
+  .tech-list { display: flex; flex-wrap: wrap; gap: 0.75rem; margin: 1.2rem 0; }
+  .tech-tag { background: rgba(168,85,247,0.12); color: var(--purple-bright); border: 1px solid var(--border); padding: 0.45rem 1.1rem; border-radius: 999px; font-size: 0.9rem; font-weight: 600; transition: all 0.3s ease; }
+  .tech-tag:hover { background: var(--purple); color: #fff; transform: translateY(-3px); box-shadow: 0 0 20px var(--purple-glow), 0 0 40px rgba(168,85,247,0.4); }
+
+  .highlight {
+    background: linear-gradient(135deg, rgba(168,85,247,0.12), rgba(124,58,237,0.06)); border: 1px solid var(--border); border-left: 4px solid var(--purple);
+    padding: 1.1rem 1.3rem; border-radius: 10px; margin: 1.2rem 0; box-shadow: 0 0 25px rgba(168,85,247,0.12); position: relative; overflow: hidden;
+  }
+  .highlight::after {
+    content: ""; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(192,132,252,0.15), transparent); animation: sweep 5s ease-in-out infinite;
+  }
+  @keyframes sweep { 0% { left: -100%; } 60% { left: 100%; } 100% { left: 100%; } }
+  .highlight strong { color: var(--purple-bright); }
+
+  footer { text-align: center; padding: 2.5rem 2rem; color: var(--text-dim); font-size: 0.9rem; border-top: 1px solid var(--border); position: relative; }
+  footer::before {
+    content: ""; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 200px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--purple-bright), transparent); box-shadow: 0 0 12px var(--purple-glow);
+  }
+
+  @media (max-width: 600px) {
+    header { padding: 4rem 1.2rem 3rem; } main { padding: 1rem 1rem 3rem; }
+    section { padding: 1.6rem; } section h2 { font-size: 1.35rem; }
+  }
+  ::-webkit-scrollbar { width: 10px; } ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: linear-gradient(var(--purple), #7c3aed); border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--purple-bright); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>TicketFlow</h1>
+  <p>Como eu fiz o site — documentação técnica do projeto</p>
+</header>
+
+<main>
+
+  <!-- PARTE 1: PROBLEMA -->
+  <section>
+    <h2><span class="step-number">1</span> Problema</h2>
+    <p>
+      A organização de shows e eventos musicais costuma ser feita de forma dispersa:
+      cadastro de artistas e locais, controle de ingressos e campanhas de divulgação
+      ficam espalhados em planilhas e conversas, e o público não tem um lugar único
+      para conhecer a programação e comprar ingressos.
+    </p>
+    <p>
+      O desafio era criar um site que reunisse, no mesmo sistema, a <strong>área de
+      gestão</strong> (para quem organiza os eventos) e a <strong>vitrine de compra</strong>
+      (para quem quer ir aos shows), com controle real do estoque de ingressos.
+    </p>
+    <div class="highlight">
+      <strong>Objetivo central:</strong> construir uma aplicação web de venda e
+      gerenciamento de ingressos para shows, com acesso por login, perfis diferentes
+      para administrador e público, e estrutura preparada para expansão futura.
+    </div>
+  </section>
+
+  <!-- PARTE 2: O QUE EU FIZ -->
+  <section>
+    <h2><span class="step-number">2</span> O Que Eu Fiz</h2>
+    <p>
+      Desenvolvi o <strong>TicketFlow</strong>, um site de shows em que o administrador
+      gerencia todo o cadastro e o usuário comum navega pelos eventos e compra ingressos.
+      O acesso ao site é protegido por login.
+    </p>
+
+    <h3>Autenticação e perfis</h3>
+    <ul>
+      <li><strong>Login, cadastro e recuperação de senha</strong> por e-mail, com mensagens de erro em português;</li>
+      <li><strong>Dois perfis:</strong> <em>Administrador</em> (cadastra, edita e exclui) e <em>Visualização</em> (consulta e compra). Quem cria conta entra sempre como perfil comum;</li>
+      <li>Sem login, o usuário vê apenas a tela de acesso.</li>
+    </ul>
+
+    <h3>Área pública (compra)</h3>
+    <ul>
+      <li><strong>Página inicial</strong> com os eventos agrupados por gênero musical (Sertanejo, Funk, Rock, Pagode, Eletrônica) e <strong>busca</strong> por evento ou artista, ignorando acentos;</li>
+      <li><strong>Cards de evento</strong> com imagem, artista, data, horário, local e selo de "Esgotado" ou "Encerrado";</li>
+      <li><strong>Página de detalhes</strong> do evento, com tipos de ingresso (Pista, Camarote, Área VIP, Arquibancada), preço, lote e seletor de quantidade (limite de 6 por tipo);</li>
+      <li><strong>Pagamento simulado</strong> com cartão de crédito (até 6x sem juros), débito ou Pix, com validação dos campos;</li>
+      <li><strong>Ingresso digital</strong> com código do pedido e QR Code ilustrativo, gerado depois da aprovação.</li>
+    </ul>
+
+    <h3>Área administrativa (gestão)</h3>
+    <ul>
+      <li><strong>CRUD completo</strong> de cinco cadastros: Eventos, Artistas, Locais, Ingressos e Divulgação;</li>
+      <li><strong>Formulários validados</strong>, com campos obrigatórios, máscara de moeda e relacionamentos (um evento escolhe o local e os artistas, filtrados pelo gênero);</li>
+      <li>Clique no card de um evento na página inicial abre direto a <strong>edição</strong> dele.</li>
+    </ul>
+
+    <div class="highlight">
+      <strong>Controle de estoque:</strong> a compra desconta os ingressos do banco dentro de
+      uma <strong>transação do Firestore</strong>. Ou todos os itens são descontados, ou nenhum;
+      se alguém comprar o mesmo ingresso ao mesmo tempo, a compra é recusada em vez de o estoque
+      ficar negativo. Quando zera, o ingresso passa para "Esgotado".
+    </div>
+
+    <p>
+      Todo o código foi versionado no <strong>GitHub</strong>.
+    </p>
+    <div class="highlight">
+      <strong>Repositório:</strong>
+      <a href="https://github.com/m4rtinsluiz/ticketflow?">https://github.com/m4rtinsluiz/ticketflow?</a>
+    </div>
+  </section>
+
+  <!-- PARTE 3: COMO -->
+  <section>
+    <h2><span class="step-number">3</span> Como</h2>
+    <p>
+      O projeto é uma aplicação de página única (SPA) feita com componentes React e um
+      banco na nuvem, sem servidor próprio:
+    </p>
+
+    <div class="tech-list">
+      <span class="tech-tag">React 18</span>
+      <span class="tech-tag">JavaScript (JSX)</span>
+      <span class="tech-tag">Vite</span>
+      <span class="tech-tag">Firebase Auth</span>
+      <span class="tech-tag">Cloud Firestore</span>
+      <span class="tech-tag">CSS puro</span>
+      <span class="tech-tag">Git &amp; GitHub</span>
+    </div>
+
+    <h3>Front-end</h3>
+    <p>
+      Utilizei <strong>React</strong> com <strong>Vite</strong> para construir a interface de
+      forma componentizada. A navegação entre telas é controlada por estado no
+      <code>App.jsx</code>, e o tema escuro com tons de roxo foi escrito em
+      <strong>CSS puro</strong>, com variáveis de cor reaproveitadas em todos os componentes.
+    </p>
+
+    <h3>Cadastros guiados por configuração</h3>
+    <p>
+      Em vez de criar uma tela para cada cadastro, cada coleção tem um arquivo em
+      <code>src/config/</code> que descreve seus campos, tipos e colunas. Um único componente,
+      o <code>CrudPage</code>, lê essa configuração e monta a tabela, o formulário, a validação e as
+      ações de criar, editar e excluir. Para adicionar um cadastro novo basta criar um arquivo de configuração.
+    </p>
+
+    <h3>Banco de dados e autenticação</h3>
+    <p>
+      Utilizei o <strong>Firebase</strong> como back-end: o <em>Firestore</em> guarda as
+      coleções <code>eventos</code>, <code>artistas</code>, <code>local</code>,
+      <code>ingressos</code>, <code>divulgacao</code> e <code>usuarios</code>, e o
+      <em>Firebase Authentication</em> cuida do login por e-mail e senha. O perfil
+      (<code>admin</code> ou <code>comum</code>) fica no documento do usuário em
+      <code>usuarios</code>, e o perfil de administrador só é concedido por quem gerencia o banco.
+    </p>
+
+    <h3>Compra e pagamento</h3>
+    <p>
+      O fluxo tem três etapas: escolha dos ingressos, pagamento e comprovante. O pagamento é
+      <strong>fictício</strong>, apenas para demonstração: nada digitado é enviado ou salvo, e
+      o QR Code é gerado no próprio navegador, só como ilustração. O desconto de estoque, por outro lado,
+      é real e feito pela transação descrita acima.
+    </p>
+
+    <h3>Versionamento e Organização</h3>
+    <p>
+      O projeto foi versionado com <strong>Git</strong> e hospedado no
+      <strong>GitHub</strong>, com as pastas separadas por responsabilidade.
+    </p>
+
+    <pre><code>ticketflow/
+├── index.html
+├── vite.config.js
+├── package.json
+└── src/
+    ├── App.jsx            # login, perfil e navegação entre telas
+    ├── main.jsx
+    ├── index.css          # tema escuro roxo
+    ├── utils.js           # datas, moeda e busca sem acento
+    ├── components/        # Header, EventCard, CrudPage, Pagamento, IngressoQR, QRCodeFake
+    ├── pages/             # Home, EventoDetalhe, Login, Cadastro, Eventos, Artistas, Locais...
+    ├── config/            # campos e colunas de cada coleção
+    └── services/          # authService, crudService, compraService, seedService, firebaseConnection</code></pre>
+  </section>
+
+  <!-- PARTE 4: RESULTADO -->
+  <section>
+    <h2><span class="step-number">4</span> Resultado</h2>
+    <p>
+      O resultado foi um site funcional que cobre o ciclo completo de um show:
+      o administrador cadastra artistas, locais, eventos e ingressos, e o público
+      encontra o evento, escolhe os ingressos e recebe o comprovante com QR Code.
+    </p>
+    <ul>
+      <li><strong>Praticidade:</strong> da busca ao ingresso em poucas etapas, com preço total atualizado na hora;</li>
+      <li><strong>Segurança de acesso:</strong> site liberado só após login, com perfis separados para administrador e público;</li>
+      <li><strong>Consistência dos dados:</strong> o estoque é controlado por transação e nunca fica negativo;</li>
+      <li><strong>Manutenção simples:</strong> cadastros descritos por configuração e componentes reutilizados;</li>
+      <li><strong>Evolução:</strong> a estrutura permite incluir pagamento real, leitura de QR Code na portaria, relatórios e notificações sem refazer a base.</li>
+    </ul>
+    <div class="highlight">
+      <strong>Links do projeto:</strong><br>
+      Site: <a href="https://m4rtinsluiz.github.io/ticketflow/">https://m4rtinsluiz.github.io/ticketflow/</a><br>
+      Repositório: <a href="https://github.com/m4rtinsluiz/ticketflow?">https://github.com/m4rtinsluiz/ticketflow?</a>
+    </div>
+  </section>
+
+  <!-- PARTE 5: SOBRE MIM -->
+  <section>
+    <h2><span class="step-number">5</span> Sobre Mim</h2>
+    <ul>
+      <li><strong>Nome:</strong> Luiz Guilherme Farias Martins</li>
+      <li><strong>Curso:</strong> Análise e Desenvolvimento de Sistemas</li>
+      <li><strong>Faculdade:</strong> Fatec de Araçatuba</li>
+      <li><strong>Uma frase sobre mim:</strong> Uma pessoa proativa, dedicada ao aprendizado e ao desenvolvimento profissional, sempre em busca de novos conhecimentos e desafios.</li>
+      <li><strong>LinkedIn:</strong> <a href="www.linkedin.com/in/luiz-martins-23191b322">www.linkedin.com/in/luiz-martins-23191b322</a></li>
+      <li><strong>E-mail profissional:</strong> <a href="mailto:">luiz.martins4@aluno.cps.sp.gov.br</a></li>
+    </ul>
+  </section>
+
+</main>
+
+<footer>
+  <p>Documentação desenvolvida para fins acadêmicos &mdash; Luiz Guilherme Farias Martins, 2026</p>
+</footer>
+
+</body>
+</html>
